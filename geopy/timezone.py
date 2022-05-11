@@ -32,9 +32,9 @@ def from_timezone_name(timezone_name, raw):
         )
     except KeyError:
         raise GeocoderParseError(
-            "geopy could not find a timezone in this response: %s" %
-            raw
+            f"geopy could not find a timezone in this response: {raw}"
         )
+
     return Timezone(pytz_timezone, raw)
 
 
@@ -79,7 +79,7 @@ class Timezone:
         return str(self._pytz_timezone)
 
     def __repr__(self):
-        return "Timezone(%s)" % repr(self.pytz_timezone)
+        return f"Timezone({repr(self.pytz_timezone)})"
 
     def __getstate__(self):
         return self._pytz_timezone, self._raw

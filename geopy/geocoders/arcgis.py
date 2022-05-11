@@ -115,19 +115,13 @@ class ArcGIS(Geocoder):
         self.password = password
         self.referer = referer
         self.auth_domain = auth_domain.strip('/')
-        self.auth_api = (
-            '%s://%s%s' % (self.scheme, self.auth_domain, self.auth_path)
-        )
+        self.auth_api = f'{self.scheme}://{self.auth_domain}{self.auth_path}'
 
         self.token_lifetime = token_lifetime * 60  # store in seconds
 
         self.domain = domain.strip('/')
-        self.api = (
-            '%s://%s%s' % (self.scheme, self.domain, self.geocode_path)
-        )
-        self.reverse_api = (
-            '%s://%s%s' % (self.scheme, self.domain, self.reverse_path)
-        )
+        self.api = f'{self.scheme}://{self.domain}{self.geocode_path}'
+        self.reverse_api = f'{self.scheme}://{self.domain}{self.reverse_path}'
 
         # Mutable state
         self.token = None
@@ -248,10 +242,7 @@ class ArcGIS(Geocoder):
             (response['location']['y'], response['location']['x']),
             response['address']
         )
-        if exactly_one:
-            return location
-        else:
-            return [location]
+        return location if exactly_one else [location]
 
     def _authenticated_call_geocoder(
         self, url, parse_callback, *, timeout=DEFAULT_SENTINEL
@@ -270,11 +261,13 @@ class ArcGIS(Geocoder):
             )
 
         def maybe_reauthenticate_callback(response, *, from_token):
-            if "error" in response:
-                if response["error"]["code"] == self._TOKEN_EXPIRED:
-                    return self._refresh_authentication_token(
-                        query_retry_callback, timeout=timeout, from_token=from_token
-                    )
+            if (
+                "error" in response
+                and response["error"]["code"] == self._TOKEN_EXPIRED
+            ):
+                return self._refresh_authentication_token(
+                    query_retry_callback, timeout=timeout, from_token=from_token
+                )
             return parse_callback(response)
 
         def query_retry_callback():

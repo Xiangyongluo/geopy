@@ -28,7 +28,7 @@ __all__ = (
     "options",
 )
 
-_DEFAULT_USER_AGENT = "geopy/%s" % __version__
+_DEFAULT_USER_AGENT = f"geopy/{__version__}"
 
 _DEFAULT_ADAPTER_CLASS = next(
     adapter_cls
@@ -185,6 +185,8 @@ class options:
     default_user_agent = _DEFAULT_USER_AGENT
 
 
+# Create an object which `repr` returns 'DEFAULT_SENTINEL'. Sphinx (docs) uses
+# this value when generating method's signature.
 # Create an object which `repr` returns 'DEFAULT_SENTINEL'. Sphinx (docs) uses
 # this value when generating method's signature.
 DEFAULT_SENTINEL = type('object', (object,),

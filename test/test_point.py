@@ -261,10 +261,7 @@ class PointTestCase(unittest.TestCase):
         self.assertEqual(point.altitude, self.alt)
 
     def test_point_eq(self):
-        self.assertEqual(
-            Point(self.lat, self.lon),
-            Point("%s %s" % (self.lat, self.lon))
-        )
+        self.assertEqual(Point(self.lat, self.lon), Point(f"{self.lat} {self.lon}"))
 
     def test_point_ne(self):
         self.assertTrue(

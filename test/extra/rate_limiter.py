@@ -41,10 +41,7 @@ def auto_async_side_effect(is_async):
 
 @pytest.fixture
 def rate_limiter_cls(is_async):
-    if is_async:
-        return AsyncRateLimiter
-    else:
-        return RateLimiter
+    return AsyncRateLimiter if is_async else RateLimiter
 
 
 @pytest.fixture

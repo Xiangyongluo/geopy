@@ -66,7 +66,7 @@ class LiveAddress(Geocoder):
         self.auth_token = auth_token
 
         domain = 'api.smartystreets.com'
-        self.api = '%s://%s%s' % (self.scheme, domain, self.geocode_path)
+        self.api = f'{self.scheme}://{domain}{self.geocode_path}'
 
     def geocode(
             self,
@@ -113,8 +113,8 @@ class LiveAddress(Geocoder):
         return self._call_geocoder(url, callback, timeout=timeout)
 
     def _geocoder_exception_handler(self, error):
-        search = "no active subscriptions found"
         if isinstance(error, AdapterHTTPError):
+            search = "no active subscriptions found"
             if search in str(error).lower():
                 raise GeocoderQuotaExceeded(str(error)) from error
             if search in (error.text or "").lower():

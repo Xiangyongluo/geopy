@@ -202,7 +202,7 @@ def _normalize_proxies(proxies):
             # from requests (in some envs):
             #   urllib3.exceptions.ProxySchemeUnknown: Not supported
             #   proxy scheme localhost
-            url = "http://%s" % url
+            url = f"http://{url}"
         normalized[scheme] = url
     return normalized
 
@@ -271,9 +271,11 @@ class URLLibAdapter(BaseSyncAdapter):
             status_code = page.getcode()
             if status_code >= 400:
                 raise AdapterHTTPError(
-                    "Non-successful status code %s" % status_code,
-                    status_code=status_code, text=text
+                    f"Non-successful status code {status_code}",
+                    status_code=status_code,
+                    text=text,
                 )
+
 
         return text
 
@@ -387,26 +389,33 @@ class RequestsAdapter(BaseSyncAdapter):
             resp = self.session.get(url, timeout=timeout, headers=headers)
         except Exception as error:
             message = str(error)
-            if isinstance(error, SocketTimeout):
+            if (
+                not isinstance(error, SocketTimeout)
+                and isinstance(error, SSLError)
+                and "timed out" in message
+                or isinstance(error, SocketTimeout)
+                or not isinstance(error, SSLError)
+                and not isinstance(error, requests.ConnectionError)
+                and isinstance(error, requests.Timeout)
+            ):
                 raise GeocoderTimedOut("Service timed out")
-            elif isinstance(error, SSLError):
-                if "timed out" in message:
-                    raise GeocoderTimedOut("Service timed out")
-            elif isinstance(error, requests.ConnectionError):
-                if "unauthorized" in message.lower():
-                    raise GeocoderServiceError(message)
-                else:
-                    raise GeocoderUnavailable(message)
-            elif isinstance(error, requests.Timeout):
-                raise GeocoderTimedOut("Service timed out")
+            elif isinstance(error, SSLError) or not isinstance(
+                error, requests.ConnectionError
+            ):
+                pass
+            elif "unauthorized" in message.lower():
+                raise GeocoderServiceError(message)
+            else:
+                raise GeocoderUnavailable(message)
             raise GeocoderServiceError(message)
         else:
             if resp.status_code >= 400:
                 raise AdapterHTTPError(
-                    "Non-successful status code %s" % resp.status_code,
+                    f"Non-successful status code {resp.status_code}",
                     status_code=resp.status_code,
                     text=resp.text,
                 )
+
 
         return resp
 
@@ -488,7 +497,7 @@ class AioHTTPAdapter(BaseAsyncAdapter):
     async def _raise_for_status(self, resp):
         if resp.status >= 400:
             raise AdapterHTTPError(
-                "Non-successful status code %s" % resp.status,
+                f"Non-successful status code {resp.status}",
                 status_code=resp.status,
                 text=await resp.text(),
             )

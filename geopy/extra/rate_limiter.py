@@ -259,7 +259,7 @@ class RateLimiter(BaseRateLimiter):
         assert max_retries >= 0
 
     def _sleep(self, seconds):  # pragma: no cover
-        logger.debug(type(self).__name__ + " sleep(%r)", seconds)
+        logger.debug(f"{type(self).__name__} sleep(%r)", seconds)
         sleep(seconds)
 
     def _acquire_request_slot(self):
@@ -382,7 +382,7 @@ class AsyncRateLimiter(BaseRateLimiter):
         assert max_retries >= 0
 
     async def _sleep(self, seconds):  # pragma: no cover
-        logger.debug(type(self).__name__ + " sleep(%r)", seconds)
+        logger.debug(f"{type(self).__name__} sleep(%r)", seconds)
         await asyncio.sleep(seconds)
 
     async def _acquire_request_slot(self):

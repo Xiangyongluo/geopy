@@ -237,19 +237,19 @@ class CommonComparisonCases:
         self.assertFalse(self.cls(1) != self.cls(1))
 
     def test_should_support_comparison_with_number(self):
-        self.assertTrue(1 <= self.cls(1))
-        self.assertTrue(1 >= self.cls(1))
-        self.assertTrue(1 < self.cls(2))
-        self.assertTrue(2 > self.cls(1))
-        self.assertTrue(1 == self.cls(1))
-        self.assertTrue(1 != self.cls(2))
+        self.assertTrue(self.cls(1) >= 1)
+        self.assertTrue(self.cls(1) <= 1)
+        self.assertTrue(self.cls(2) > 1)
+        self.assertTrue(self.cls(1) < 2)
+        self.assertTrue(self.cls(1) == 1)
+        self.assertTrue(self.cls(2) != 1)
 
-        self.assertFalse(2 <= self.cls(1))
-        self.assertFalse(1 >= self.cls(2))
-        self.assertFalse(2 < self.cls(1))
-        self.assertFalse(1 > self.cls(2))
-        self.assertFalse(1 == self.cls(2))
-        self.assertFalse(1 != self.cls(1))
+        self.assertFalse(self.cls(1) >= 2)
+        self.assertFalse(self.cls(2) <= 1)
+        self.assertFalse(self.cls(1) > 2)
+        self.assertFalse(self.cls(2) < 1)
+        self.assertFalse(self.cls(2) == 1)
+        self.assertFalse(self.cls(1) != 1)
 
 
 class CommonDistanceCases(CommonDistanceComputationCases,

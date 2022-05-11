@@ -124,7 +124,7 @@ class IGNFrance(Geocoder):
         self.referer = referer
         self.domain = domain.strip('/')
         api_path = self.api_path % dict(api_key=self.api_key)
-        self.api = '%s://%s%s' % (self.scheme, self.domain, api_path)
+        self.api = f'{self.scheme}://{self.domain}{api_path}'
 
     def geocode(
             self,
@@ -199,11 +199,7 @@ class IGNFrance(Geocoder):
         )
 
         # Manage type change for xml case sensitive
-        if is_freeform:
-            is_freeform = 'true'
-        else:
-            is_freeform = 'false'
-
+        is_freeform = 'true' if is_freeform else 'false'
         # Manage filtering value
         if filtering is None:
             filtering = ''
@@ -296,11 +292,11 @@ class IGNFrance(Geocoder):
                 )
 
         point = self._coerce_point_to_string(query, "%(lat)s %(lon)s")
-        reverse_geocode_preference = '\n'.join((
-            '<ReverseGeocodePreference>%s</ReverseGeocodePreference>' % pref
-            for pref
-            in reverse_geocode_preference
-        ))
+        reverse_geocode_preference = '\n'.join(
+            f'<ReverseGeocodePreference>{pref}</ReverseGeocodePreference>'
+            for pref in reverse_geocode_preference
+        )
+
 
         request_string = xml_request.format(
             maximum_responses=maximum_responses,
@@ -456,7 +452,7 @@ class IGNFrance(Geocoder):
         if self.username and self.password and self.referer is None:
             credentials = '{0}:{1}'.format(self.username, self.password).encode()
             auth_str = base64.standard_b64encode(credentials).decode()
-            headers['Authorization'] = 'Basic {}'.format(auth_str.strip())
+            headers['Authorization'] = f'Basic {auth_str.strip()}'
 
         return self._call_geocoder(
             url,
@@ -473,26 +469,15 @@ class IGNFrance(Geocoder):
         # When freeform already so full address
         if is_freeform == 'true':
             location = place.get('freeformaddress')
+        elif place.get('numero'):
+            location = place.get('street')
         else:
-            # For parcelle
-            if place.get('numero'):
-                location = place.get('street')
-            else:
                 # When classic geocoding
                 # or when reverse geocoding
-                location = "%s %s" % (
-                    place.get('postal_code', ''),
-                    place.get('commune', ''),
-                )
-                if place.get('street'):
-                    location = "%s, %s" % (
-                        place.get('street', ''),
-                        location,
-                    )
-                if place.get('building'):
-                    location = "%s %s" % (
-                        place.get('building', ''),
-                        location,
-                    )
+            location = f"{place.get('postal_code', '')} {place.get('commune', '')}"
+            if place.get('street'):
+                location = f"{place.get('street', '')}, {location}"
+            if place.get('building'):
+                location = f"{place.get('building', '')} {location}"
 
         return Location(location, (place.get('lat'), place.get('lng')), place)

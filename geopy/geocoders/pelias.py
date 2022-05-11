@@ -74,12 +74,8 @@ class Pelias(Geocoder):
         self.api_key = api_key
         self.domain = domain.strip('/')
 
-        self.geocode_api = (
-            '%s://%s%s' % (self.scheme, self.domain, self.geocode_path)
-        )
-        self.reverse_api = (
-            '%s://%s%s' % (self.scheme, self.domain, self.reverse_path)
-        )
+        self.geocode_api = f'{self.scheme}://{self.domain}{self.geocode_path}'
+        self.reverse_api = f'{self.scheme}://{self.domain}{self.reverse_path}'
 
     def geocode(
             self,
@@ -124,9 +120,7 @@ class Pelias(Geocoder):
         params = {'text': query}
 
         if self.api_key:
-            params.update({
-                'api_key': self.api_key
-            })
+            params['api_key'] = self.api_key
 
         if boundary_rect:
             lon1, lat1, lon2, lat2 = self._format_bounding_box(
@@ -193,9 +187,7 @@ class Pelias(Geocoder):
             params['lang'] = language
 
         if self.api_key:
-            params.update({
-                'api_key': self.api_key
-            })
+            params['api_key'] = self.api_key
 
         url = "?".join((self.reverse_api, urlencode(params)))
         logger.debug("%s.reverse: %s", self.__class__.__name__, url)

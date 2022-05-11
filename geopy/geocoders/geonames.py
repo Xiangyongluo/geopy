@@ -88,18 +88,10 @@ class GeoNames(Geocoder):
         self.username = username
 
         domain = 'api.geonames.org'
-        self.api = (
-            "%s://%s%s" % (self.scheme, domain, self.geocode_path)
-        )
-        self.api_reverse = (
-            "%s://%s%s" % (self.scheme, domain, self.reverse_path)
-        )
-        self.api_reverse_nearby = (
-            "%s://%s%s" % (self.scheme, domain, self.reverse_nearby_path)
-        )
-        self.api_timezone = (
-            "%s://%s%s" % (self.scheme, domain, self.timezone_path)
-        )
+        self.api = f"{self.scheme}://{domain}{self.geocode_path}"
+        self.api_reverse = f"{self.scheme}://{domain}{self.reverse_path}"
+        self.api_reverse_nearby = f"{self.scheme}://{domain}{self.reverse_nearby_path}"
+        self.api_timezone = f"{self.scheme}://{domain}{self.timezone_path}"
 
     def geocode(
             self,
@@ -146,9 +138,7 @@ class GeoNames(Geocoder):
             country = []
         if isinstance(country, str):
             country = [country]
-        for country_item in country:
-            params.append(('country', country_item))
-
+        params.extend(('country', country_item) for country_item in country)
         if exactly_one:
             params.append(('maxRows', 1))
         url = "?".join((self.api, urlencode(params)))
@@ -230,8 +220,9 @@ class GeoNames(Geocoder):
             url = "?".join((self.api_reverse_nearby, urlencode(params)))
         else:
             raise GeocoderQueryError(
-                '`%s` find_nearby_type is not supported by geopy' % find_nearby_type
+                f'`{find_nearby_type}` find_nearby_type is not supported by geopy'
             )
+
 
         logger.debug("%s.reverse: %s", self.__class__.__name__, url)
         callback = partial(self._parse_json, exactly_one=exactly_one)
@@ -295,32 +286,31 @@ class GeoNames(Geocoder):
         return self._call_geocoder(url, self._parse_json_timezone, timeout=timeout)
 
     def _raise_for_error(self, body):
-        err = body.get('status')
-        if err:
-            code = err['value']
-            message = err['message']
-            # http://www.geonames.org/export/webservice-exception.html
-            if message.startswith("user account not enabled to use"):
-                raise GeocoderInsufficientPrivileges(message)
-            if code == 10:
-                raise GeocoderAuthenticationFailure(message)
-            if code in (18, 19, 20):
-                raise GeocoderQuotaExceeded(message)
-            raise GeocoderServiceError(message)
+        if not (err := body.get('status')):
+            return
+        code = err['value']
+        message = err['message']
+        # http://www.geonames.org/export/webservice-exception.html
+        if message.startswith("user account not enabled to use"):
+            raise GeocoderInsufficientPrivileges(message)
+        if code == 10:
+            raise GeocoderAuthenticationFailure(message)
+        if code in (18, 19, 20):
+            raise GeocoderQuotaExceeded(message)
+        raise GeocoderServiceError(message)
 
     def _parse_json_timezone(self, response):
         self._raise_for_error(response)
 
         timezone_id = response.get("timezoneId")
-        if timezone_id is None:
-            # Sometimes (e.g. for Antarctica) GeoNames doesn't return
-            # a `timezoneId` value, but it returns GMT offsets.
-            # Apparently GeoNames always returns these offsets -- for
-            # every single point on the globe.
-            raw_offset = response["rawOffset"]
-            return from_fixed_gmt_offset(raw_offset, raw=response)
-        else:
+        if timezone_id is not None:
             return from_timezone_name(timezone_id, raw=response)
+        # Sometimes (e.g. for Antarctica) GeoNames doesn't return
+        # a `timezoneId` value, but it returns GMT offsets.
+        # Apparently GeoNames always returns these offsets -- for
+        # every single point on the globe.
+        raw_offset = response["rawOffset"]
+        return from_fixed_gmt_offset(raw_offset, raw=response)
 
     def _parse_json(self, doc, exactly_one):
         """

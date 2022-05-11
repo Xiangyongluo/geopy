@@ -314,9 +314,11 @@ class Point:
         return self.format()
 
     def __eq__(self, other):
-        if not isinstance(other, collections.abc.Iterable):
-            return NotImplemented
-        return tuple(self) == tuple(other)
+        return (
+            tuple(self) == tuple(other)
+            if isinstance(other, collections.abc.Iterable)
+            else NotImplemented
+        )
 
     def __ne__(self, other):
         return not (self == other)
@@ -330,12 +332,12 @@ class Point:
         :rtype: float
         """
         degrees = float(degrees)
-        negative = degrees < 0
         arcminutes = float(arcminutes)
         arcseconds = float(arcseconds)
 
         if arcminutes or arcseconds:
             more = units.degrees(arcminutes=arcminutes, arcseconds=arcseconds)
+            negative = degrees < 0
             if negative:
                 degrees -= more
             else:
@@ -364,25 +366,24 @@ class Point:
         :param str unit: ``distance`` unit. Supported units
             are listed in :meth:`.from_string` doc.
         """
-        if distance is not None:
-            distance = float(distance)
-            CONVERTERS = {
-                'km': lambda d: d,
-                'm': lambda d: units.kilometers(meters=d),
-                'mi': lambda d: units.kilometers(miles=d),
-                'ft': lambda d: units.kilometers(feet=d),
-                'nm': lambda d: units.kilometers(nautical=d),
-                'nmi': lambda d: units.kilometers(nautical=d)
-            }
-            try:
-                return CONVERTERS[unit](distance)
-            except KeyError:
-                raise NotImplementedError(
-                    'Bad distance unit specified, valid are: %r' %
-                    CONVERTERS.keys()
-                )
-        else:
+        if distance is None:
             return distance
+        distance = float(distance)
+        CONVERTERS = {
+            'km': lambda d: d,
+            'm': lambda d: units.kilometers(meters=d),
+            'mi': lambda d: units.kilometers(miles=d),
+            'ft': lambda d: units.kilometers(feet=d),
+            'nm': lambda d: units.kilometers(nautical=d),
+            'nmi': lambda d: units.kilometers(nautical=d)
+        }
+        try:
+            return CONVERTERS[unit](distance)
+        except KeyError:
+            raise NotImplementedError(
+                'Bad distance unit specified, valid are: %r' %
+                CONVERTERS.keys()
+            )
 
     @classmethod
     def from_string(cls, string):
@@ -423,40 +424,40 @@ class Point:
             - ``UT: N 39°20' 0'' / W 74°35' 0''``
 
         """
-        match = re.match(cls.POINT_PATTERN, re.sub(r"''", r'"', string))
-        if match:
-            latitude_direction = None
-            if match.group("latitude_direction_front"):
-                latitude_direction = match.group("latitude_direction_front")
-            elif match.group("latitude_direction_back"):
-                latitude_direction = match.group("latitude_direction_back")
-
-            longitude_direction = None
-            if match.group("longitude_direction_front"):
-                longitude_direction = match.group("longitude_direction_front")
-            elif match.group("longitude_direction_back"):
-                longitude_direction = match.group("longitude_direction_back")
-            latitude = cls.parse_degrees(
-                match.group('latitude_degrees') or 0.0,
-                match.group('latitude_arcminutes') or 0.0,
-                match.group('latitude_arcseconds') or 0.0,
-                latitude_direction
-            )
-            longitude = cls.parse_degrees(
-                match.group('longitude_degrees') or 0.0,
-                match.group('longitude_arcminutes') or 0.0,
-                match.group('longitude_arcseconds') or 0.0,
-                longitude_direction
-            )
-            altitude = cls.parse_altitude(
-                match.group('altitude_distance'),
-                match.group('altitude_units')
-            )
-            return cls(latitude, longitude, altitude)
-        else:
+        if not (match := re.match(cls.POINT_PATTERN, re.sub(r"''", r'"', string))):
             raise ValueError(
                 "Failed to create Point instance from string: unknown format."
             )
+        latitude_direction = None
+        if match["latitude_direction_front"]:
+            latitude_direction = match["latitude_direction_front"]
+        elif match["latitude_direction_back"]:
+            latitude_direction = match["latitude_direction_back"]
+
+        longitude_direction = None
+        if match["longitude_direction_front"]:
+            longitude_direction = match["longitude_direction_front"]
+        elif match["longitude_direction_back"]:
+            longitude_direction = match["longitude_direction_back"]
+        latitude = cls.parse_degrees(
+            match['latitude_degrees'] or 0.0,
+            match['latitude_arcminutes'] or 0.0,
+            match['latitude_arcseconds'] or 0.0,
+            latitude_direction,
+        )
+
+        longitude = cls.parse_degrees(
+            match['longitude_degrees'] or 0.0,
+            match['longitude_arcminutes'] or 0.0,
+            match['longitude_arcseconds'] or 0.0,
+            longitude_direction,
+        )
+
+        altitude = cls.parse_altitude(
+            match['altitude_distance'], match['altitude_units']
+        )
+
+        return cls(latitude, longitude, altitude)
 
     @classmethod
     def from_sequence(cls, seq):

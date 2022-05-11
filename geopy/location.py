@@ -25,9 +25,7 @@ class Location:
 
         if isinstance(point, Point):
             self._point = point
-        elif isinstance(point, str):
-            self._point = Point(point)
-        elif isinstance(point, collections.abc.Sequence):
+        elif isinstance(point, (str, collections.abc.Sequence)):
             self._point = Point(point)
         else:
             raise TypeError(
@@ -111,9 +109,7 @@ class Location:
         return self._address
 
     def __repr__(self):
-        return "Location(%s, (%s, %s, %s))" % (
-            self._address, self.latitude, self.longitude, self.altitude
-        )
+        return f"Location({self._address}, ({self.latitude}, {self.longitude}, {self.altitude}))"
 
     def __iter__(self):
         return iter(self._tuple)

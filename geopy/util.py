@@ -13,7 +13,7 @@ def pairwise(seq):
     """
     Pair an iterable, e.g., (1, 2, 3, 4) -> ((1, 2), (2, 3), (3, 4))
     """
-    for i in range(0, len(seq) - 1):
+    for i in range(len(seq) - 1):
         yield (seq[i], seq[i + 1])
 
 

@@ -59,8 +59,7 @@ class DataBC(Geocoder):
             ssl_context=ssl_context,
             adapter_factory=adapter_factory,
         )
-        domain = 'apps.gov.bc.ca'
-        self.api = '%s://%s%s' % (self.scheme, domain, self.geocode_path)
+        self.api = f'{self.scheme}://apps.gov.bc.ca{self.geocode_path}'
 
     def geocode(
             self,
@@ -127,9 +126,7 @@ class DataBC(Geocoder):
         # Success; convert from GeoJSON
         if not len(response['features']):
             return None
-        geocoded = []
-        for feature in response['features']:
-            geocoded.append(self._parse_feature(feature))
+        geocoded = [self._parse_feature(feature) for feature in response['features']]
         if exactly_one:
             return geocoded[0]
         return geocoded

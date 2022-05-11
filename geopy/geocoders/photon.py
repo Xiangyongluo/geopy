@@ -70,8 +70,8 @@ class Photon(Geocoder):
             adapter_factory=adapter_factory,
         )
         self.domain = domain.strip('/')
-        self.api = "%s://%s%s" % (self.scheme, self.domain, self.geocode_path)
-        self.reverse_api = "%s://%s%s" % (self.scheme, self.domain, self.reverse_path)
+        self.api = f"{self.scheme}://{self.domain}{self.geocode_path}"
+        self.reverse_api = f"{self.scheme}://{self.domain}{self.reverse_path}"
 
     def geocode(
             self,
@@ -133,13 +133,13 @@ class Photon(Geocoder):
         if osm_tag:
             if isinstance(osm_tag, str):
                 params['osm_tag'] = [osm_tag]
-            else:
-                if not isinstance(osm_tag, collections.abc.Iterable):
-                    raise ValueError(
-                        "osm_tag must be a string or "
-                        "an iterable of strings"
-                    )
+            elif isinstance(osm_tag, collections.abc.Iterable):
                 params['osm_tag'] = list(osm_tag)
+            else:
+                raise ValueError(
+                    "osm_tag must be a string or "
+                    "an iterable of strings"
+                )
         url = "?".join((self.api, urlencode(params, doseq=True)))
         logger.debug("%s.geocode: %s", self.__class__.__name__, url)
         callback = partial(self._parse_json, exactly_one=exactly_one)

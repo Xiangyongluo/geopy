@@ -191,10 +191,7 @@ class TestGeoNamesInvalidAccount(BaseTestGeocoder):
 
     @classmethod
     def make_geocoder(cls, **kwargs):
-        return GeoNames(
-            username="geopy-not-existing-%s" % uuid.uuid4(),
-            **kwargs
-        )
+        return GeoNames(username=f"geopy-not-existing-{uuid.uuid4()}", **kwargs)
 
     async def test_geocode(self):
         with pytest.raises(GeocoderAuthenticationFailure):

@@ -70,12 +70,8 @@ class GeocodeFarm(Geocoder):
         )
         self.api_key = api_key
         domain = 'www.geocode.farm'
-        self.api = (
-            "%s://%s%s" % (self.scheme, domain, self.geocode_path)
-        )
-        self.reverse_api = (
-            "%s://%s%s" % (self.scheme, domain, self.reverse_path)
-        )
+        self.api = f"{self.scheme}://{domain}{self.geocode_path}"
+        self.reverse_api = f"{self.scheme}://{domain}{self.reverse_path}"
 
     def geocode(self, query, *, exactly_one=True, timeout=DEFAULT_SENTINEL):
         """
@@ -169,10 +165,7 @@ class GeocodeFarm(Geocoder):
             return None
 
         places = self._parse_code(geocoding_results)
-        if exactly_one:
-            return places[0]
-        else:
-            return places
+        return places[0] if exactly_one else places
 
     def _check_for_api_errors(self, geocoding_results):
         """

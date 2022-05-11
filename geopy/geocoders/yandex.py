@@ -64,8 +64,7 @@ class Yandex(Geocoder):
             adapter_factory=adapter_factory,
         )
         self.api_key = api_key
-        domain = 'geocode-maps.yandex.ru'
-        self.api = '%s://%s%s' % (self.scheme, domain, self.api_path)
+        self.api = f'{self.scheme}://geocode-maps.yandex.ru{self.api_path}'
 
     def geocode(
             self,
@@ -101,11 +100,7 @@ class Yandex(Geocoder):
         :rtype: ``None``, :class:`geopy.location.Location` or a list of them, if
             ``exactly_one=False``.
         """
-        params = {
-            'geocode': query,
-            'format': 'json'
-        }
-        params['apikey'] = self.api_key
+        params = {'geocode': query, 'format': 'json', 'apikey': self.api_key}
         if lang:
             params['lang'] = lang
         if exactly_one:
@@ -161,11 +156,7 @@ class Yandex(Geocoder):
             point = self._coerce_point_to_string(query, "%(lon)s,%(lat)s")
         except ValueError:
             raise ValueError("Must be a coordinate pair or Point")
-        params = {
-            'geocode': point,
-            'format': 'json'
-        }
-        params['apikey'] = self.api_key
+        params = {'geocode': point, 'format': 'json', 'apikey': self.api_key}
         if lang:
             params['lang'] = lang
         if kind:

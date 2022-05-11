@@ -68,7 +68,7 @@ class MapBox(Geocoder):
         )
         self.api_key = api_key
         self.domain = domain.strip('/')
-        self.api = "%s://%s%s" % (self.scheme, self.domain, self.api_path)
+        self.api = f"{self.scheme}://{self.domain}{self.api_path}"
 
     def _parse_json(self, json, exactly_one=True):
         '''Returns location, (latitude, longitude) from json feed.'''
@@ -129,9 +129,8 @@ class MapBox(Geocoder):
         :rtype: ``None``, :class:`geopy.location.Location` or a list of them, if
             ``exactly_one=False``.
         """
-        params = {}
+        params = {'access_token': self.api_key}
 
-        params['access_token'] = self.api_key
         if bbox:
             params['bbox'] = self._format_bounding_box(
                 bbox, "%(lon1)s,%(lat1)s,%(lon2)s,%(lat2)s")
@@ -145,7 +144,7 @@ class MapBox(Geocoder):
 
         if proximity:
             p = Point(proximity)
-            params['proximity'] = "%s,%s" % (p.longitude, p.latitude)
+            params['proximity'] = f"{p.longitude},{p.latitude}"
 
         quoted_query = quote(query.encode('utf-8'))
         url = "?".join((self.api % dict(query=quoted_query),
@@ -180,9 +179,7 @@ class MapBox(Geocoder):
         :rtype: ``None``, :class:`geopy.location.Location` or a list of them, if
             ``exactly_one=False``.
         """
-        params = {}
-        params['access_token'] = self.api_key
-
+        params = {'access_token': self.api_key}
         point = self._coerce_point_to_string(query, "%(lon)s,%(lat)s")
         quoted_query = quote(point.encode('utf-8'))
         url = "?".join((self.api % dict(query=quoted_query),

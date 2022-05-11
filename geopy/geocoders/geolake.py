@@ -86,7 +86,7 @@ class Geolake(Geocoder):
 
         self.api_key = api_key
         self.domain = domain.strip('/')
-        self.api = '%s://%s%s' % (self.scheme, self.domain, self.api_path)
+        self.api = f'{self.scheme}://{self.domain}{self.api_path}'
 
     def geocode(
             self,
@@ -164,10 +164,7 @@ class Geolake(Geocoder):
 
         address = self._get_address(page)
         result = Location(address, (latitude, longitude), page)
-        if exactly_one:
-            return result
-        else:
-            return [result]
+        return result if exactly_one else [result]
 
     def _get_address(self, page):
         """
@@ -178,5 +175,4 @@ class Geolake(Geocoder):
         place = page.get('place')
         address_city = place.get('city')
         address_country_code = place.get('countryCode')
-        address = join_filter(', ', [address_city, address_country_code])
-        return address
+        return join_filter(', ', [address_city, address_country_code])

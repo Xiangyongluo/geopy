@@ -14,9 +14,7 @@ def degrees(radians=0, arcminutes=0, arcseconds=0):
     """
     Convert angle to degrees.
     """
-    deg = 0.
-    if radians:
-        deg = math.degrees(radians)
+    deg = math.degrees(radians) if radians else 0.
     if arcminutes:
         deg += arcminutes / arcmin(degrees=1.)
     if arcseconds:

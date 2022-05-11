@@ -239,10 +239,10 @@ class Distance:
         raise NotImplementedError("Distance is an abstract class")
 
     def __repr__(self):  # pragma: no cover
-        return 'Distance(%s)' % self.kilometers
+        return f'Distance({self.kilometers})'
 
     def __str__(self):  # pragma: no cover
-        return '%s km' % self.__kilometers
+        return f'{self.__kilometers} km'
 
     def __cmp__(self, other):  # py2 only
         if isinstance(other, Distance):
@@ -443,10 +443,7 @@ class geodesic(Distance):
                 self.geod.f == self.ELLIPSOID[2]):
             self.geod = Geodesic(self.ELLIPSOID[0], self.ELLIPSOID[2])
 
-        s12 = self.geod.Inverse(lat1, lon1, lat2, lon2,
-                                Geodesic.DISTANCE)['s12']
-
-        return s12
+        return self.geod.Inverse(lat1, lon1, lat2, lon2, Geodesic.DISTANCE)['s12']
 
     def destination(self, point, bearing, distance=None):
         """

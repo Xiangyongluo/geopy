@@ -68,17 +68,14 @@ class What3Words(Geocoder):
 
         self.api_key = api_key
         domain = 'api.what3words.com'
-        self.geocode_api = '%s://%s%s' % (self.scheme, domain, self.geocode_path)
-        self.reverse_api = '%s://%s%s' % (self.scheme, domain, self.reverse_path)
+        self.geocode_api = f'{self.scheme}://{domain}{self.geocode_path}'
+        self.reverse_api = f'{self.scheme}://{domain}{self.reverse_path}'
 
     def _check_query(self, query):
         """
         Check query validity with regex
         """
-        if not self.multiple_word_re.match(query):
-            return False
-        else:
-            return True
+        return bool(self.multiple_word_re.match(query))
 
     def geocode(
             self,
@@ -150,17 +147,16 @@ class What3Words(Geocoder):
             Parse record.
             """
 
-            if 'geometry' in resource:
-                words = resource['words']
-                position = resource['geometry']
-                latitude, longitude = position['lat'], position['lng']
-                if latitude and longitude:
-                    latitude = float(latitude)
-                    longitude = float(longitude)
-
-                return Location(words, (latitude, longitude), resource)
-            else:
+            if 'geometry' not in resource:
                 raise exc.GeocoderParseError('Error parsing result.')
+            words = resource['words']
+            position = resource['geometry']
+            latitude, longitude = position['lat'], position['lng']
+            if latitude and longitude:
+                latitude = float(latitude)
+                longitude = float(longitude)
+
+            return Location(words, (latitude, longitude), resource)
 
         location = parse_resource(resources)
         if exactly_one:

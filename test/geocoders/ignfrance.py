@@ -148,11 +148,9 @@ class BaseTestIGNFrance(BaseTestGeocoder):
         )
 
         departements_no_spatial = list(
-            set([
-                i.raw['departement']
-                for i in res_no_spatial_filter
-            ])
+            {i.raw['departement'] for i in res_no_spatial_filter}
         )
+
 
         assert len(departements_no_spatial) > len(departements_spatial)
 
@@ -204,14 +202,16 @@ class BaseTestIGNFrance(BaseTestGeocoder):
             {},
         )
 
-        coordinates_couples_radius = set([
-            (str(location.latitude) + ' ' + str(location.longitude))
+        coordinates_couples_radius = {
+            f'{str(location.latitude)} {str(location.longitude)}'
             for location in res_call_radius
-        ])
-        coordinates_couples = set([
-            (str(location.latitude) + ' ' + str(location.longitude))
+        }
+
+        coordinates_couples = {
+            f'{str(location.latitude)} {str(location.longitude)}'
             for location in res_call
-        ])
+        }
+
 
         assert coordinates_couples_radius.issubset(coordinates_couples)
 

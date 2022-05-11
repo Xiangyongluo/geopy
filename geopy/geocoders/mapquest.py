@@ -77,12 +77,8 @@ class MapQuest(Geocoder):
         self.api_key = api_key
         self.domain = domain.strip('/')
 
-        self.geocode_api = (
-            '%s://%s%s' % (self.scheme, self.domain, self.geocode_path)
-        )
-        self.reverse_api = (
-            '%s://%s%s' % (self.scheme, self.domain, self.reverse_path)
-        )
+        self.geocode_api = f'{self.scheme}://{self.domain}{self.geocode_path}'
+        self.reverse_api = f'{self.scheme}://{self.domain}{self.reverse_path}'
 
     def _parse_json(self, json, exactly_one=True):
         '''Returns location, (latitude, longitude) from json feed.'''
@@ -151,10 +147,7 @@ class MapQuest(Geocoder):
         :rtype: ``None``, :class:`geopy.location.Location` or a list of them, if
             ``exactly_one=False``.
         """
-        params = {}
-        params['key'] = self.api_key
-        params['location'] = query
-
+        params = {'key': self.api_key, 'location': query}
         if limit is not None:
             params['maxResults'] = limit
 
@@ -198,9 +191,7 @@ class MapQuest(Geocoder):
         :rtype: ``None``, :class:`geopy.location.Location` or a list of them, if
             ``exactly_one=False``.
         """
-        params = {}
-        params['key'] = self.api_key
-
+        params = {'key': self.api_key}
         point = self._coerce_point_to_string(query, "%(lat)s,%(lon)s")
         params['location'] = point
 

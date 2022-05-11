@@ -3,6 +3,7 @@
 geopy
 """
 
+
 import sys
 
 from setuptools import find_packages, setup
@@ -52,20 +53,18 @@ setup(
     maintainer='Kostya Esmukov',
     maintainer_email='kostya@esmukov.ru',
     url='https://github.com/geopy/geopy',
-    download_url=(
-        'https://github.com/geopy/geopy/archive/%s.tar.gz' % version
-    ),
+    download_url=f'https://github.com/geopy/geopy/archive/{version}.tar.gz',
     packages=find_packages(exclude=["*test*"]),
     install_requires=INSTALL_REQUIRES,
     extras_require={
-        "dev": (EXTRAS_DEV_TESTFILES_COMMON +
-                EXTRAS_DEV_LINT +
-                EXTRAS_DEV_TEST +
-                EXTRAS_DEV_DOCS),
-        "dev-lint": (EXTRAS_DEV_TESTFILES_COMMON +
-                     EXTRAS_DEV_LINT),
-        "dev-test": (EXTRAS_DEV_TESTFILES_COMMON +
-                     EXTRAS_DEV_TEST),
+        "dev": (
+            EXTRAS_DEV_TESTFILES_COMMON
+            + EXTRAS_DEV_LINT
+            + EXTRAS_DEV_TEST
+            + EXTRAS_DEV_DOCS
+        ),
+        "dev-lint": (EXTRAS_DEV_TESTFILES_COMMON + EXTRAS_DEV_LINT),
+        "dev-test": (EXTRAS_DEV_TESTFILES_COMMON + EXTRAS_DEV_TEST),
         "dev-docs": EXTRAS_DEV_DOCS,
         "aiohttp": ["aiohttp"],
         "requests": [
@@ -73,7 +72,6 @@ setup(
             # ^^^ earlier versions would work, but a custom ssl
             # context would silently have system certificates be loaded as
             # trusted: https://github.com/urllib3/urllib3/pull/1566
-
             "requests>=2.16.2",
             # ^^^ earlier versions would work, but they use an older
             # vendored version of urllib3 (see note above)
@@ -101,5 +99,5 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
-    ]
+    ],
 )

@@ -13,9 +13,9 @@ from geopy.location import Location
 _env = {}
 try:
     with open(".test_keys") as fp:
-        _env.update(json.loads(fp.read()))
+        _env |= json.loads(fp.read())
 except IOError:
-    _env.update(os.environ)
+    _env |= os.environ
 
 
 class SkipIfMissingEnv(dict):
@@ -27,7 +27,7 @@ class SkipIfMissingEnv(dict):
         assert self.is_internet_access_allowed is not None
         if key not in self:
             if self.is_internet_access_allowed:
-                pytest.skip("Missing geocoder credential: %s" % (key,))
+                pytest.skip(f"Missing geocoder credential: {key}")
             else:
                 # Generate some dummy token. We won't perform a networking
                 # request anyways.
@@ -106,11 +106,11 @@ class BaseTestGeocoder(ABC):
             if expect_failure:
                 return
             elif skiptest_on_failure:
-                pytest.skip('%s: Skipping test due to empty result' % cls.__name__)
+                pytest.skip(f'{cls.__name__}: Skipping test due to empty result')
             else:
-                pytest.fail('%s: No result found' % cls.__name__)
+                pytest.fail(f'{cls.__name__}: No result found')
         if result == []:
-            pytest.fail('%s returned an empty list instead of None' % cls.__name__)
+            pytest.fail(f'{cls.__name__} returned an empty list instead of None')
         self._verify_request(result, exactly_one=payload.get('exactly_one', True),
                              **expected)
         return result
@@ -128,11 +128,11 @@ class BaseTestGeocoder(ABC):
             if expect_failure:
                 return
             elif skiptest_on_failure:
-                pytest.skip('%s: Skipping test due to empty result' % cls.__name__)
+                pytest.skip(f'{cls.__name__}: Skipping test due to empty result')
             else:
-                pytest.fail('%s: No result found' % cls.__name__)
+                pytest.fail(f'{cls.__name__}: No result found')
         if result == []:
-            pytest.fail('%s returned an empty list instead of None' % cls.__name__)
+            pytest.fail(f'{cls.__name__} returned an empty list instead of None')
         self._verify_request(result, exactly_one=payload.get('exactly_one', True),
                              **expected)
         return result
@@ -152,16 +152,13 @@ class BaseTestGeocoder(ABC):
         call = getattr(geocoder, method)
         run_async = isinstance(geocoder.adapter, BaseAsyncAdapter)
         try:
-            if run_async:
-                result = await call(*args, **kwargs)
-            else:
-                result = call(*args, **kwargs)
+            result = await call(*args, **kwargs) if run_async else call(*args, **kwargs)
         except exc.GeocoderQuotaExceeded:
-            pytest.skip("%s: Quota exceeded" % cls.__name__)
+            pytest.skip(f"{cls.__name__}: Quota exceeded")
         except exc.GeocoderTimedOut:
-            pytest.skip("%s: Service timed out" % cls.__name__)
+            pytest.skip(f"{cls.__name__}: Service timed out")
         except exc.GeocoderUnavailable:
-            pytest.skip("%s: Service unavailable" % cls.__name__)
+            pytest.skip(f"{cls.__name__}: Service unavailable")
         return result
 
     def _verify_request(
